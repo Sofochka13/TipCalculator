@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
@@ -85,10 +87,12 @@ fun DemoScreen(modifier: Modifier = Modifier) {
 
     var orderSum by remember { mutableStateOf("") }
     var dishesCount by remember { mutableStateOf("") }
-
     var tipPercent by remember { mutableFloatStateOf(0f) }
-
     var discountPercent by remember { mutableIntStateOf(0) }
+
+    var tipsText by remember { mutableStateOf("") }
+    var discountText by remember { mutableStateOf("") }
+    var totalText by remember { mutableStateOf("") }
 
     LaunchedEffect(dishesCount) {
         val dishes = dishesCount.toIntOrNull()
@@ -106,157 +110,105 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        DemoText(
-            message = "Калькулятор чаевых",
-            fontSize = 24.sp
-        )
-
+        DemoText(message = "Калькулятор чаевых", fontSize = 24.sp)
         Spacer(modifier = Modifier.height(30.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Сумма заказа:",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Сумма заказа:", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(10.dp))
             OutlinedTextField(
                 value = orderSum,
                 onValueChange = { orderSum = it },
-                modifier = Modifier
-                    .width(150.dp)
-                    .background(Color(0xFFFFC0CB)),
+                modifier = Modifier.width(150.dp).background(Color(0xFFFFC0CB)),
                 shape = RoundedCornerShape(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
-                )
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent)
             )
         }
-
         Spacer(modifier = Modifier.height(20.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Количество блюд:",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "Количество блюд:", fontSize = 16.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.width(10.dp))
             OutlinedTextField(
                 value = dishesCount,
                 onValueChange = { dishesCount = it },
-                modifier = Modifier
-                    .width(100.dp)
-                    .background(Color(0xFFFFC0CB)),
+                modifier = Modifier.width(100.dp).background(Color(0xFFFFC0CB)),
                 shape = RoundedCornerShape(8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent
-                )
+                colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Color.Transparent, unfocusedBorderColor = Color.Transparent)
             )
         }
-
         Spacer(modifier = Modifier.height(30.dp))
 
-        DemoText(
-            message = "Чаевые:",
-            fontSize = 16.sp
-        )
-
-        Spacer(modifier = Modifier.height(10.dp))
-
+        DemoText(message = "Чаевые: ${tipPercent.toInt()}%", fontSize = 16.sp)
         Slider(
             value = tipPercent,
             onValueChange = { tipPercent = it },
             valueRange = 0f..25f,
             steps = 24,
             modifier = Modifier.fillMaxWidth(),
-            colors = SliderDefaults.colors(
-                thumbColor = Color(0xFF27A6F5),
-                activeTrackColor = Color(0xFF27A6F5),
-                inactiveTrackColor = Color(0xFFE0E0E0)
-            )
+            colors = SliderDefaults.colors(thumbColor = Color(0xFF27A6F5), activeTrackColor = Color(0xFF27A6F5), inactiveTrackColor = Color(0xFFE0E0E0))
         )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             Text(text = "0", fontSize = 14.sp)
             Text(text = "25", fontSize = 14.sp)
+        }
+        Spacer(modifier = Modifier.height(30.dp))
+
+        DemoText(message = "Скидка: $discountPercent%", fontSize = 16.sp)
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+            listOf(3, 5, 7, 10).forEach { percent ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    RadioButton(
+                        selected = discountPercent == percent,
+                        onClick = null,
+                        enabled = false,
+                        colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF27A6F5), unselectedColor = Color.Gray)
+                    )
+                    Text("$percent%", fontSize = 14.sp)
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        DemoText(
-            message = "Скидка:",
-            fontSize = 16.sp
-        )
+        Button(
+            onClick = {
+                if (orderSum.isEmpty()) {
+                    tipsText = "Введите сумму заказа!"
+                    discountText = ""
+                    totalText = ""
+                } else {
+                    val sum = orderSum.replace(",", ".").toDoubleOrNull()
+                    if (sum == null || sum <= 0) {
+                        tipsText = "Ошибка: некорректная сумма!"
+                        discountText = ""
+                        totalText = ""
+                    } else {
+                        val tips = sum * (tipPercent / 100)
+                        val discount = sum * (discountPercent / 100)
+                        val total = sum + tips - discount
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+                        tipsText = "Чаевые: ${"%.2f".format(tips)} руб."
+                        discountText = "Скидка: ${"%.2f".format(discount)} руб."
+                        totalText = "Итого к оплате: ${"%.2f".format(total)} руб."
+                    }
+                }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27A6F5), contentColor = Color.White),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                RadioButton(
-                    selected = discountPercent == 3,
-                    onClick = null,
-                    enabled = false,
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Color(0xFF27A6F5),
-                        unselectedColor = Color.Gray
-                    )
-                )
-                Text("3%", fontSize = 14.sp)
-            }
+            Text("Рассчитать", fontSize = 18.sp)
+        }
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                RadioButton(
-                    selected = discountPercent == 5,
-                    onClick = null,
-                    enabled = false,
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Color(0xFF27A6F5),
-                        unselectedColor = Color.Gray
-                    )
-                )
-                Text("5%", fontSize = 14.sp)
-            }
+        Spacer(modifier = Modifier.height(20.dp))
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                RadioButton(
-                    selected = discountPercent == 7,
-                    onClick = null,
-                    enabled = false,
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Color(0xFF27A6F5),
-                        unselectedColor = Color.Gray
-                    )
-                )
-                Text("7%", fontSize = 14.sp)
-            }
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                RadioButton(
-                    selected = discountPercent == 10,
-                    onClick = null,
-                    enabled = false,
-                    colors = RadioButtonDefaults.colors(
-                        selectedColor = Color(0xFF27A6F5),
-                        unselectedColor = Color.Gray
-                    )
-                )
-                Text("10%", fontSize = 14.sp)
-            }
+        if (tipsText.isNotEmpty()) {
+            Text(text = tipsText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = discountText, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(text = totalText, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF27A6F5))
         }
     }
 }
