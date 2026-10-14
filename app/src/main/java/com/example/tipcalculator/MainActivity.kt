@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,9 +19,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,9 +64,10 @@ fun DemoText(message: String, fontSize: TextUnit) {
 
 @Composable
 fun DemoScreen(modifier: Modifier = Modifier) {
-    // Переменные для хранения ввода (var — изменяемые, из Sh01)
     var orderSum by remember { mutableStateOf("") }
     var dishesCount by remember { mutableStateOf("") }
+
+    var tipPercent by remember { mutableFloatStateOf(0f) }
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -73,7 +76,6 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        // Заголовок
         DemoText(
             message = "Калькулятор чаевых",
             fontSize = 24.sp
@@ -128,6 +130,42 @@ fun DemoScreen(modifier: Modifier = Modifier) {
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent
                 )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        DemoText(
+            message = "Чаевые:",
+            fontSize = 16.sp
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Slider(
+            value = tipPercent,
+            onValueChange = { tipPercent = it },
+            valueRange = 0f..25f,
+            steps = 24,  // 25 шагов (0, 1, 2, ..., 25)
+            modifier = Modifier.fillMaxWidth(),
+            colors = SliderDefaults.colors(
+                thumbColor = Color(0xFF27A6F5),
+                activeTrackColor = Color(0xFF27A6F5),
+                inactiveTrackColor = Color(0xFFE0E0E0)
+            )
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "0",
+                fontSize = 14.sp
+            )
+            Text(
+                text = "25",
+                fontSize = 14.sp
             )
         }
     }
