@@ -18,13 +18,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -53,6 +57,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+fun calculateDiscount(dishes: Int): Int {
+    return if (dishes in 1..2) {
+        3
+    } else if (dishes in 3..5) {
+        5
+    } else if (dishes in 6..10) {
+        7
+    } else if (dishes > 10) {
+        10
+    } else {
+        0
+    }
+}
+
 @Composable
 fun DemoText(message: String, fontSize: TextUnit) {
     Text(
@@ -64,10 +82,22 @@ fun DemoText(message: String, fontSize: TextUnit) {
 
 @Composable
 fun DemoScreen(modifier: Modifier = Modifier) {
+
     var orderSum by remember { mutableStateOf("") }
     var dishesCount by remember { mutableStateOf("") }
 
     var tipPercent by remember { mutableFloatStateOf(0f) }
+
+    var discountPercent by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(dishesCount) {
+        val dishes = dishesCount.toIntOrNull()
+        if (dishes != null && dishes > 0) {
+            discountPercent = calculateDiscount(dishes)
+        } else {
+            discountPercent = 0
+        }
+    }
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -146,7 +176,7 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             value = tipPercent,
             onValueChange = { tipPercent = it },
             valueRange = 0f..25f,
-            steps = 24,  // 25 шагов (0, 1, 2, ..., 25)
+            steps = 24,
             modifier = Modifier.fillMaxWidth(),
             colors = SliderDefaults.colors(
                 thumbColor = Color(0xFF27A6F5),
@@ -159,14 +189,74 @@ fun DemoScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "0",
-                fontSize = 14.sp
-            )
-            Text(
-                text = "25",
-                fontSize = 14.sp
-            )
+            Text(text = "0", fontSize = 14.sp)
+            Text(text = "25", fontSize = 14.sp)
+        }
+
+        Spacer(modifier = Modifier.height(30.dp))
+
+        DemoText(
+            message = "Скидка:",
+            fontSize = 16.sp
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                RadioButton(
+                    selected = discountPercent == 3,
+                    onClick = null,
+                    enabled = false,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = Color(0xFF27A6F5),
+                        unselectedColor = Color.Gray
+                    )
+                )
+                Text("3%", fontSize = 14.sp)
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                RadioButton(
+                    selected = discountPercent == 5,
+                    onClick = null,
+                    enabled = false,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = Color(0xFF27A6F5),
+                        unselectedColor = Color.Gray
+                    )
+                )
+                Text("5%", fontSize = 14.sp)
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                RadioButton(
+                    selected = discountPercent == 7,
+                    onClick = null,
+                    enabled = false,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = Color(0xFF27A6F5),
+                        unselectedColor = Color.Gray
+                    )
+                )
+                Text("7%", fontSize = 14.sp)
+            }
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                RadioButton(
+                    selected = discountPercent == 10,
+                    onClick = null,
+                    enabled = false,
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = Color(0xFF27A6F5),
+                        unselectedColor = Color.Gray
+                    )
+                )
+                Text("10%", fontSize = 14.sp)
+            }
         }
     }
 }
