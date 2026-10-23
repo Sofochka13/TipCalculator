@@ -66,8 +66,10 @@ fun calculateDiscount(dishes: Int): Int {
         5
     } else if (dishes in 6..10) {
         7
-    } else if (dishes > 10) {
+    } else if (dishes in 11..14) {
         10
+    } else if (dishes > 14) {
+        15
     } else {
         0
     }
@@ -159,7 +161,7 @@ fun DemoScreen(modifier: Modifier = Modifier) {
         DemoText(message = "Скидка: $discountPercent%", fontSize = 16.sp)
         Spacer(modifier = Modifier.height(10.dp))
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-            listOf(3, 5, 7, 10).forEach { percent ->
+            listOf(3, 5, 7, 10, 15).forEach { percent ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     RadioButton(
                         selected = discountPercent == percent,
